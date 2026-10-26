@@ -2,13 +2,312 @@
 <html lang="ar" dir="rtl">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>TAFRA Smart QR</title>
+    <link rel="preconnect" href="https://go-tafra.vercel.app" crossorigin />
+    <link rel="dns-prefetch" href="https://go-tafra.vercel.app" />
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        background-color: #090d16;
+        color: #f8fafc;
+        font-family: 'Cairo', system-ui, -apple-system, sans-serif;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+        overflow-x: hidden;
+      }
+      @keyframes shimmer {
+        0% { background-position: -200% 0; }
+        100% { background-position: 200% 0; }
+      }
+      @keyframes pulseRing {
+        0% { transform: scale(0.95); opacity: 0.9; }
+        70% { transform: scale(1.9); opacity: 0; }
+        100% { transform: scale(1.9); opacity: 0; }
+      }
+      @keyframes progressFill {
+        0% { width: 15%; }
+        100% { width: 100%; }
+      }
+      .shimmer {
+        background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(0,196,214,0.10) 50%, rgba(255,255,255,0.03) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.4s ease-in-out infinite;
+      }
+      .container {
+        width: 100%;
+        max-width: 460px;
+        margin: 0 auto;
+        padding: 16px 16px 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .status-pill-wrap {
+        display: flex;
+        justify-content: center;
+      }
+      .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 16px;
+        border-radius: 999px;
+        background: #0d1526;
+        border: 1px solid rgba(0, 196, 214, 0.38);
+        box-shadow: 0 0 22px rgba(0, 196, 214, 0.16);
+      }
+      .dot-wrap {
+        position: relative;
+        width: 8px;
+        height: 8px;
+        display: inline-flex;
+      }
+      .dot-ping {
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        background: #00c4d6;
+        animation: pulseRing 1.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+      }
+      .dot-core {
+        position: relative;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #00c4d6;
+      }
+      .status-text {
+        font-size: 11px;
+        font-weight: 700;
+        color: #cbd5e1;
+      }
+      .status-logo {
+        height: 12px;
+        width: auto;
+        object-fit: contain;
+      }
+      .progress-track {
+        width: 100%;
+        height: 3px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.06);
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #00c4d6, #38bdf8);
+        animation: progressFill 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+      }
+      .hero-card {
+        border-radius: 24px;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        background: #131c2e;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+      }
+      .cover-box {
+        height: 132px;
+        width: 100%;
+      }
+      .profile-body {
+        padding: 0 20px 20px;
+        text-align: center;
+      }
+      .avatar-box {
+        width: 96px;
+        height: 96px;
+        margin: -48px auto 12px;
+        border-radius: 24px;
+        border: 4px solid #131c2e;
+        background: #0f172a;
+        overflow: hidden;
+      }
+      .line-title {
+        height: 22px;
+        width: 180px;
+        margin: 0 auto 10px;
+        border-radius: 10px;
+      }
+      .line-sub {
+        height: 13px;
+        width: 230px;
+        margin: 0 auto 8px;
+        border-radius: 8px;
+      }
+      .line-pill {
+        height: 22px;
+        width: 150px;
+        margin: 10px auto 0;
+        border-radius: 999px;
+      }
+      .quick-row {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 16px;
+        padding-top: 16px;
+        border-top: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .quick-btn {
+        flex: 1;
+        max-width: 130px;
+        height: 48px;
+        border-radius: 12px;
+      }
+      .action-stack {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .action-card {
+        height: 56px;
+        width: 100%;
+        border-radius: 14px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        background: #131c2e;
+        padding: 0 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .action-card.primary {
+        background: rgba(0, 196, 214, 0.12);
+        border-color: rgba(0, 196, 214, 0.3);
+      }
+      .action-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .icon-sk {
+        width: 36px;
+        height: 36px;
+        border-radius: 12px;
+      }
+      .text-sk {
+        width: 150px;
+        height: 14px;
+        border-radius: 8px;
+      }
+      .footer-wrap {
+        padding: 24px 0 16px;
+        display: flex;
+        justify-content: center;
+      }
+      .tafra-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: rgba(8, 13, 22, 0.95);
+        border: 1px solid rgba(0, 196, 214, 0.4);
+        box-shadow: 0 4px 20px rgba(0, 196, 214, 0.16);
+        direction: ltr;
+      }
+      .tafra-badge span {
+        font-size: 11px;
+        font-weight: 600;
+        color: #cbd5e1;
+        letter-spacing: 0.02em;
+      }
+      .tafra-badge img {
+        height: 14px;
+        width: auto;
+        object-fit: contain;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="status-pill-wrap">
+        <div class="status-pill">
+          <span class="dot-wrap">
+            <span class="dot-ping"></span>
+            <span class="dot-core"></span>
+          </span>
+          <span class="status-text">جاري فتح الصفحة الذكية...</span>
+          <img src="/go/tafra-logo.png" alt="TAFRA" class="status-logo" />
+        </div>
+      </div>
+
+      <div class="progress-track">
+        <div class="progress-bar"></div>
+      </div>
+
+      <div class="hero-card">
+        <div class="cover-box shimmer"></div>
+        <div class="profile-body">
+          <div class="avatar-box">
+            <div style="width:100%;height:100%" class="shimmer"></div>
+          </div>
+          <div class="line-title shimmer"></div>
+          <div class="line-sub shimmer"></div>
+          <div class="line-pill shimmer"></div>
+          <div class="quick-row">
+            <div class="quick-btn shimmer"></div>
+            <div class="quick-btn shimmer"></div>
+            <div class="quick-btn shimmer"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="action-stack">
+        <div class="action-card primary">
+          <div class="action-left">
+            <div class="icon-sk shimmer"></div>
+            <div class="text-sk shimmer"></div>
+          </div>
+        </div>
+        <div class="action-card">
+          <div class="action-left">
+            <div class="icon-sk shimmer"></div>
+            <div class="text-sk shimmer"></div>
+          </div>
+        </div>
+        <div class="action-card">
+          <div class="action-left">
+            <div class="icon-sk shimmer"></div>
+            <div class="text-sk shimmer"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-wrap">
+      <div class="tafra-badge">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#00c4d6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <rect width="5" height="5" x="3" y="3" rx="1"/>
+          <rect width="5" height="5" x="16" y="3" rx="1"/>
+          <rect width="5" height="5" x="3" y="16" rx="1"/>
+          <path d="M21 16h-3a2 2 0 0 0-2 2v3"/>
+          <path d="M21 21v.01"/>
+          <path d="M12 7v3a2 2 0 0 1-2 2H7"/>
+          <path d="M3 12h.01"/>
+          <path d="M12 3h.01"/>
+          <path d="M12 16v.01"/>
+          <path d="M16 12h1"/>
+          <path d="M21 12v.01"/>
+          <path d="M12 21v-1"/>
+        </svg>
+        <span>Powered by</span>
+        <img src="/go/tafra-logo.png" alt="TAFRA" />
+      </div>
+    </div>
+
     <script type="text/javascript">
       (function () {
         var targetOrigin = "https://go-tafra.vercel.app";
         var path = window.location.pathname || "/";
-        // Strip leading /go or /go/ repository prefix
         var subPath = path.replace(/^\/go(\/|$)/i, "/");
         if (!subPath.startsWith("/")) {
           subPath = "/" + subPath;
@@ -18,36 +317,11 @@
           subPath +
           (window.location.search || "") +
           (window.location.hash || "");
-        window.location.replace(destination);
+
+        setTimeout(function () {
+          window.location.replace(destination);
+        }, 420);
       })();
     </script>
-    <style>
-      body {
-        margin: 0;
-        background: #090d16;
-        color: #f8fafc;
-        font-family: system-ui, -apple-system, sans-serif;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 100vh;
-      }
-      .loader {
-        width: 36px;
-        height: 36px;
-        border: 3px solid rgba(245, 158, 11, 0.25);
-        border-top-color: #f59e0b;
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-      }
-      @keyframes spin {
-        to {
-          transform: rotate(360deg);
-        }
-      }
-    </style>
-  </head>
-  <body>
-    <div class="loader"></div>
   </body>
 </html>
